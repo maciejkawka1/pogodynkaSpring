@@ -1,6 +1,7 @@
 package pogodynka.controller;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,18 +29,15 @@ import java.util.List;
 public class PogodynkaController {
 
 
-
-
-
+    @Autowired
+    MySQLConnection connection;
 
     @GetMapping("/")
     public String getIndex(Model model) throws SQLException {
 
-        MySQLConnection connection = new MySQLConnection();
+
         connection.connect();
-
         List<Location> locations = connection.getAllLocations();
-
         connection.disconnect();
 
         model.addAttribute("locations", locations);
@@ -49,7 +47,7 @@ public class PogodynkaController {
 
 
     @GetMapping("/search")
-    public String search(@RequestParam("city") String city, Model model) throws IOException {
+    public String search(@RequestParam("city") String city, Model model) throws IOException, SQLException {
 
         List<OpenMeteoVariables> listParams = new ArrayList<>();
         listParams.add(OpenMeteoVariables.TEMPERATURE);
@@ -103,8 +101,12 @@ public class PogodynkaController {
 
 
             }
-        } else
-            throw new IOException("Ups");
+        } else{
+            //model.addAttribute("error","Nie znaleziono miasta");
+            //getIndex(model);
+            return "redirect:/";
+        }
+
 
 
         return "searchResults"; // np. nazwa widoku dla wyników wyszukiwania
@@ -117,14 +119,10 @@ public class PogodynkaController {
                                        @RequestParam("longtitude") Double longtitude,
                                        @RequestParam("latitude") Double latitude)
             throws CreationException {
-        MySQLConnection connection = new MySQLConnection();
+
         connection.connect();
-
         Location location = new Location(null, longtitude, latitude, city, region, country);
-
         connection.addToDatabase(location);
-
-
         connection.disconnect();
 
         return new RedirectView("/");

@@ -12,11 +12,15 @@
 <body>
 <div class="row">
     <div class="col-md-8 offset-md-2">
+        <div th:if="${error != null}" class="error-message">
+            <p th:text="${error}"></p>
+        </div>
         <form th:action="@{/search}" method="get">
             <div class="form-group">
                 <label for="city">Pogodynka</label>
                 <input type="text" class="form-control" id="city" name="city" aria-describedby="city"
                        placeholder="wyszukaj miasta">
+
             </div>
 
             <button type="submit" class="btn btn-primary">Szukaj</button>

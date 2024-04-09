@@ -2,9 +2,11 @@ package pogodynka.repository;
 
 
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import pogodynka.MySQLConnectionConfig;
 import pogodynka.dao.Location;
-import pogodynka.dao.TrackedLocations;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,11 +14,12 @@ import java.util.List;
 import java.util.UUID;
 
 
+@Component
 public class MySQLConnection {
 
-    private static final String URL = "jdbc:mysql://109.241.162.43:33306/sda_pogodynka";
-    private static final String USER = "sda";
-    private static final String PASSWORD = "sda2024MySQL";
+    @Autowired
+    @Qualifier("mySQLConnectionConfig")
+    private MySQLConnectionConfig config;
 
     private static Connection connection;
 
@@ -24,10 +27,14 @@ public class MySQLConnection {
     public void connect() {
         try {
             // Ładowanie sterownika JDBC dla MySQL
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(config.getDRIVER());
 
             // Nawiązanie połączenia
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            connection = DriverManager.getConnection(
+                    config.getUrl(),
+                    config.getUSER(),
+                    config.getPASSWORD());
+
             System.out.println("Połączono z bazą danych MySQL.");
         } catch (ClassNotFoundException e) {
             System.out.println("Nie można znaleźć sterownika JDBC.");
@@ -90,7 +97,6 @@ public class MySQLConnection {
             statement.execute(sql);
             System.out.println("Utworzono tabelę Locations");
             statement.close();
-            //connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -99,6 +105,9 @@ public class MySQLConnection {
     public void addToDatabase(List<Location> list) {
         try {
             Statement statement = connection.createStatement();
+
+
+
             for (int i = 0; i < list.size(); i++)
             {
                 String sql = "INSERT INTO Locations" +
@@ -110,12 +119,10 @@ public class MySQLConnection {
                         + list.get(i).getCity() + "','"
                         + list.get(i).getRegion() + "','"
                         + list.get(i).getCountry() + "')";
-                System.out.println(sql);
                 statement.execute(sql);
                 System.out.println("Dodano rekord do bazy danych");
             }
             statement.close();
-            //connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -161,20 +168,4 @@ public class MySQLConnection {
     }
 
 
-    public static void main(String... args) throws SQLException, CreationException {
-
-        MySQLConnection mySQLConnection = new MySQLConnection();
-        mySQLConnection.connect();
-        //mySQLConnection.createTableLocations();
-        TrackedLocations trackedLocations = new TrackedLocations();
-
-        Location location = new Location(null,56,44,"miasto", "region","22222222");
-
-        trackedLocations.addLocation(location);
-        List<Location> locationList = trackedLocations.getLocations();
-
-        mySQLConnection.addToDatabase(locationList);
-
-
-    }
 }
