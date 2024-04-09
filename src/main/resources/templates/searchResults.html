@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+
+<a href="/">
+    <button class="btn btn-danger"> powrót</button>
+</a>
+        <form th:action="@{/save}" method="post">
+            <input type="hidden" name="city" th:value="${city}" />
+            <input type="hidden" name="country" th:value="${country}" />
+            <input type="hidden" name="region" th:value="${region}" />
+            <input type="hidden" name="longtitude" th:value="${longtitude}" />
+            <input type="hidden" name="latitude" th:value="${latitude}" />
+            <input type="submit" value="Zapisz do bazy" class="btn btn-success"/>
+        </form>
+
+
+    </div>
+</div>
+<br>
+
+
+
+<div th:each="chart : ${charts}">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 th:text="${chart.title}"></h2>
+            <canvas th:id="${'chart_' + chart.title}" ></canvas>
+            <script th:inline="javascript">
+                /* <![CDATA[ */
+
+                function generateRandomColor() {
+                var r = Math.floor(Math.random() * 256);
+                var g = Math.floor(Math.random() * 256);
+                var b = Math.floor(Math.random() * 256);
+                return 'rgba(' + r + ',' + g + ',' + b + ', 1)';
+            }
+
+
+            var color = generateRandomColor();
+                var ctx = document.getElementById('chart_' + /*[[${chart.title}]]*/).getContext('2d');
+                var chartData = {
+                    labels: /*[[${chart.xData}]]*/,
+                    datasets: [{
+                        label: /*[[${chart.title}]]*/,
+                        data: /*[[${chart.yData}]]*/,
+                        backgroundColor: color,
+                        borderColor: color,
+                        borderWidth: 1
+                    }]
+                };
+                new Chart(ctx, {
+                    type: 'line',
+                    data: chartData
+                });
+                /* ]]> */
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>
